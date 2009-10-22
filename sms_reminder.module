@@ -368,6 +368,7 @@ function _sms_reminder_delete_record($nid, $vid) {
 function _sms_reminder_get_providers($only_enabled = FALSE) {
 	$providers = array(
 		'ballou' => 'Ballou',
+		'ballou_http' => 'Ballou HTTP',
 	);
 	
 	// Remove providers that aren't enabled

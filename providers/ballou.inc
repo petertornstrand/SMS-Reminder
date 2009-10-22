@@ -1,5 +1,5 @@
 <?php
-define('SMS_REMINDER_BALLOU_HOST', 'sms2.ballou.se');
+define('SMS_REMINDER_BALLOU_HOST', 'http://sms2.ballou.se');
 define('SMS_REMINDER_BALLOU_PORT', '23000');
 
 /**
@@ -13,6 +13,7 @@ function sms_reminder_ballou_settings() {
 		'#type' => 'fieldset',
 		'#title' => t('Ballou'),
 		'#collapsible' => TRUE,
+		'#collapsed' => TRUE,
 	);
 	
 	// Enabled
@@ -155,6 +156,8 @@ function sms_reminder_ballou_submit($form, &$form_state) {
 		}
 		fclose($fp);
 	}
+	
+	$ret = print_r($response, TRUE);
 	
 	// Parse response
 	$doc = simplexml_load_string($response);

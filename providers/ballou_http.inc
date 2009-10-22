@@ -12,6 +12,7 @@ function sms_reminder_ballou_http_settings() {
 		'#type' => 'fieldset',
 		'#title' => t('Ballou HTTP'),
 		'#collapsible' => TRUE,
+		'#collapsed' => TRUE,
 	);
 	
 	// Enabled
@@ -116,8 +117,8 @@ function sms_reminder_ballou_http_submit($form, &$form_state) {
 	$from = utf8_decode(variable_get('sms_reminder_ballou_http_from', variable_get('site_name', 'Drupal')));
 	
 	// UTF-8 decode
-	$to = utf8_decode($form_state['values']['phone']);
-	$message = utf8_decode($reminder['message']);
+	$to = urlencode(utf8_decode($form_state['values']['phone']));
+	$message = urlencode(utf8_decode($reminder['message']));
 	
 	// Get URL
 	$url = variable_get('sms_reminder_ballou_http_url', SMS_REMINDER_BALLOU_HOST);
@@ -136,16 +137,33 @@ function sms_reminder_ballou_http_submit($form, &$form_state) {
 		$data['T'] = $send_time;
 	}
 	
+	$get_data = '';
+	foreach($data as $var => $val) {
+		$get_data .= '&'.$var.'='.$val;
+	}
+	$get_data = substr($get_data, 1);
+	
 	// Do HTTP request
-	$response = drupal_http_request($url, array(), $method = 'GET', $data);
+	$response = file_get_contents($url.'?'.$get_data);
+	
+	// Load response
+	$doc = simplexml_load_string($response);
+	$errcode = $doc->error['code'];
+	$errstr = $doc->error;
 	
 	// Check response code
-	switch($response->code) {
-		case 200 :
+	switch($errcode) {
+		case 0 :
 			$ret = '';
 			break;
-		default :
-			$ret = $response->error;
+		case 1 :
+			$ret = t('Could not parse request.');
+			break;
+		case 2 :
+			$ret = t('Authentication failed or remote IP rejected.');
+			break;
+		case 3 :
+			$ret = t('Invalid receiver.');
 			break;
 	}
 	
